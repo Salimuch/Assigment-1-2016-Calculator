@@ -11,8 +11,9 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet private weak var display: UILabel!
+    @IBOutlet private weak var history: UILabel!
     
-    var userInTheMiddleOfTyping = false
+    private var userInTheMiddleOfTyping = false
     
     @IBAction private func touchDigit(sender: UIButton) {
         
@@ -38,6 +39,11 @@ class ViewController: UIViewController {
             brain.performOperation(mathematicalSymbol)
         }
         displayValue = brain.result
+        
+        history.text = brain.description
+        if brain.isPartialResult {
+            history.text! += "..."
+        } else { history.text! += " = " }
     }
     
     private var brain = CalculatorBrain()
