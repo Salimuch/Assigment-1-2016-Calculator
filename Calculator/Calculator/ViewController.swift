@@ -12,9 +12,51 @@ class ViewController: UIViewController {
     
     @IBOutlet private weak var display: UILabel!
     @IBOutlet private weak var history: UILabel!
+    @IBAction func save() {
+        savedProgram = brain.program
+    }
+    @IBAction func restore() {
+        if savedProgram != nil {
+            brain.program = savedProgram!
+            displayValue = brain.result
+        }
+    }
     
     private var userInTheMiddleOfTyping = false
     
+    private var brain = CalculatorBrain()
+    
+    private var displayValue: Double? {
+        get {
+            if let value = Double(display.text!) {
+                return value
+            }
+            return nil
+        }
+        set {
+            if let value = newValue {
+                display.text = String(value)
+                
+                history.text = brain.description + (brain.isPartialResult ? " ..." : " =")
+            } else {
+                display.text = " "
+                history.text = " "
+                userInTheMiddleOfTyping = false
+            }
+        }
+    }
+    
+    var savedProgram: CalculatorBrain.PropertyList?
+    
+    @IBAction func touchBackspace(sender: UIButton) {
+        if userInTheMiddleOfTyping {
+            display.text!.removeAtIndex(display.text!.endIndex.predecessor())
+        }
+        if display.text!.isEmpty {
+            userInTheMiddleOfTyping = false
+            displayValue = 0
+        }
+    }
     @IBAction private func touchDigit(sender: UIButton) {
         
         let digit = sender.currentTitle!
@@ -32,29 +74,16 @@ class ViewController: UIViewController {
 
     @IBAction private func performOperation(sender: UIButton) {
         if userInTheMiddleOfTyping {
-            brain.setOperand(displayValue)
+            if let value = displayValue {
+                brain.setOperand(value)
+            }
             userInTheMiddleOfTyping = false
         }
         if let mathematicalSymbol = sender.currentTitle {
             brain.performOperation(mathematicalSymbol)
         }
         displayValue = brain.result
-        
-        history.text = brain.description
-        if brain.isPartialResult {
-            history.text! += "..."
-        } else { history.text! += " = " }
     }
-    
-    private var brain = CalculatorBrain()
-    
-    private var displayValue: Double {
-        get {
-            return Double(display.text!)!
-        }
-        set {
-            display.text = String(newValue)
-        }
-    }
+
 }
 
